@@ -1,0 +1,30 @@
+[package]
+name = "moondrop-hub"
+version = "1.6.5"
+description = "MOONDROP Hub Desktop (Rust + Tauri v2) with native USB-HID support for Moondrop Rays and audio devices"
+authors = ["MOONDROP Hub Desktop"]
+edition = "2021"
+rust-version = "1.77.2"
+
+[lib]
+name = "moondrop_hub_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+hidapi = "2.6"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = [
+  "Win32_Foundation",
+  "Win32_System_Diagnostics_ToolHelp",
+  "Win32_System_Registry",
+  "Win32_System_Threading",
+  "Win32_UI_WindowsAndMessaging",
+] }

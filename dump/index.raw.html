@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="msapplication-TileColor" content="#00aba9" />
+    <title>Moondrop Custom EQ</title>
+    <script type="e5320f092f26f551bc8310d0-text/javascript">
+      ;(function () {
+        var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        var setting = localStorage.getItem('vueuse-color-scheme') || 'auto'
+        if (setting === 'dark' || (prefersDark && setting !== 'light'))
+          document.documentElement.classList.toggle('dark', true)
+      })()
+    </script>
+    <style>
+      html.dark {
+        color-scheme: dark;
+      }
+      /* lock scrolling while the splash is up so the app content mounting
+         underneath it can't pop in a scrollbar and re-center the logo */
+      body:has(#app-loading) {
+        overflow: hidden;
+      }
+      #app-loading {
+        position: fixed;
+        inset: 0;
+        background: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      html.dark #app-loading {
+        background: #0c0c0c;
+      }
+      html #app-loading .dark-mode {
+        display: none;
+      }
+      html.dark #app-loading .light-mode {
+        display: none;
+      }
+      html.dark #app-loading .dark-mode {
+        display: flex;
+      }
+      #app-loading.fade-out {
+        pointer-events: none;
+      }
+      #app-loading img {
+        width: 240px;
+        pointer-events: none;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-user-drag: none;
+        will-change: opacity, transform;
+        transition:
+          opacity 0.42s cubic-bezier(0.4, 0, 0.2, 1),
+          transform 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      #app-loading.fade-out img {
+        opacity: 0;
+        transform: scale(1.08);
+      }
+    </style>
+    <script type="e5320f092f26f551bc8310d0-module" crossorigin src="/assets/index-CIZ2xpvU.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-Dyoi9RnM.css">
+  
+    <meta name="app-version" content="1.6.5">
+    <meta name="app-build" content="26B1081">
+    <meta name="app-build-type" content="Beta">
+    <meta name="app-build-date" content="2026-10-10T08:35:49.109Z">
+
+    <script type="e5320f092f26f551bc8310d0-text/javascript">
+      window.__APP_VERSION__ = {"version":"1.6.5","buildNumber":"26B1081","buildDate":"2026-10-10T08:35:49.109Z","buildType":"Beta"};
+    </script>
+</head>
+  <body>
+    <div id="app"></div>
+    <div id="app-loading">
+      <img src="/moondrop.svg" alt="Loading..." class="light-mode" draggable="false" />
+      <img src="/moondrop-dark.svg" alt="Loading..." class="dark-mode" draggable="false" />
+    </div>
+    <script type="e5320f092f26f551bc8310d0-text/javascript">
+      !(function () {
+        var currentColor = localStorage.getItem('currentColor') || 'neutral'
+        var currentRadius = localStorage.getItem('currentRadius') || '0.5'
+        document.body.classList.add(`theme-${currentColor}`)
+        document.body.style.setProperty('--radius', `${currentRadius}rem`)
+      })()
+    </script>
+    <noscript> This website requires JavaScript to function properly. Please enable JavaScript to continue. </noscript>
+  <script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="e5320f092f26f551bc8310d0-|49" defer></script></body>
+</html>

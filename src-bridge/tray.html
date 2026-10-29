@@ -1,0 +1,1453 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MOONDROP Switch</title>
+    <style>
+      :root {
+        --bg: #1c1d21;
+        --bg-elevated: #27292e;
+        --bg-hover: #2d3036;
+        --bg-pill-track: #2b2d33;
+        --bg-pill-active: #474a53;
+        --text-primary: #f2f4f8;
+        --text-secondary: #989ea8;
+        --text-accent: #5ba6ff;
+        --text-success: #1dd1a1;
+        --text-warning: #f5a623;
+        --border-subtle: rgba(255, 255, 255, 0.08);
+        --toggle-active: #5ba6ff;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: var(--bg);
+        color: var(--text-primary);
+        font-family: "Segoe UI Variable Text", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 13px;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .tray-shell {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        background: var(--bg);
+        overflow: hidden;
+      }
+
+      /* Header */
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 13px 16px 8px;
+      }
+
+      .header-title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+      }
+
+      .header-title {
+        font-size: 14.5px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .game-live-pill {
+        display: none;
+        align-items: center;
+        gap: 4px;
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 999px;
+        background: rgba(29, 209, 161, 0.16);
+        color: var(--text-success);
+        border: 1px solid rgba(29, 209, 161, 0.35);
+        white-space: nowrap;
+      }
+
+      .game-live-pill.visible {
+        display: inline-flex;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .icon-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border: none;
+        border-radius: 6px;
+        background: transparent;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease;
+      }
+
+      .icon-btn:hover {
+        background: var(--bg-hover);
+        color: var(--text-primary);
+      }
+
+      /* Segmented Control (4 tabs) */
+      .segmented-wrap {
+        padding: 2px 12px 8px;
+      }
+
+      .segmented {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        background: var(--bg-pill-track);
+        border-radius: 999px;
+        padding: 3px;
+      }
+
+      .seg-btn {
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        font-size: 11.5px;
+        font-weight: 600;
+        padding: 5px 4px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: background 0.16s ease, color 0.16s ease;
+      }
+
+      .seg-btn.active {
+        background: var(--bg-pill-active);
+        color: var(--text-primary);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+      }
+
+      /* Content Area */
+      .tab-panel {
+        flex: 1;
+        overflow-y: auto;
+        padding: 2px 8px 6px;
+      }
+
+      .tab-panel.hidden {
+        display: none;
+      }
+
+      .preset-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        padding: 8.5px 10px;
+        border: none;
+        border-radius: 10px;
+        background: transparent;
+        color: inherit;
+        text-align: left;
+        cursor: pointer;
+        transition: background 0.14s ease;
+      }
+
+      .preset-row:hover {
+        background: var(--bg-hover);
+      }
+
+      .preset-row.active {
+        background: rgba(91, 166, 255, 0.08);
+      }
+
+      .preset-badge {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: var(--bg-elevated);
+        flex-shrink: 0;
+      }
+
+      .preset-row.active .preset-badge {
+        box-shadow: inset 0 0 0 1.5px var(--text-accent);
+      }
+
+      .preset-meta {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .preset-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-primary);
+        line-height: 1.25;
+      }
+
+      .preset-sub {
+        font-size: 11.5px;
+        color: var(--text-secondary);
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .preset-sub .status-tag {
+        color: var(--text-accent);
+        font-weight: 500;
+      }
+
+      .preset-sub .warn-tag {
+        color: var(--text-warning);
+      }
+
+      .preset-chevron {
+        color: var(--text-secondary);
+        flex-shrink: 0;
+        opacity: 0.75;
+        transition: transform 0.15s ease, color 0.15s ease;
+      }
+
+      .preset-row.active .preset-chevron {
+        color: var(--text-accent);
+        opacity: 1;
+      }
+
+      /* Cards */
+      .control-card {
+        background: var(--bg-elevated);
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin: 4px 4px 8px;
+      }
+
+      .control-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 6px;
+      }
+
+      .control-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .control-value {
+        font-size: 11.5px;
+        font-weight: 600;
+        color: var(--text-accent);
+      }
+
+      .gain-slider {
+        width: 100%;
+        accent-color: var(--text-accent);
+        cursor: pointer;
+        margin: 6px 0 8px;
+      }
+
+      .gain-presets {
+        display: flex;
+        gap: 6px;
+      }
+
+      .mini-btn {
+        flex: 1;
+        padding: 5px 6px;
+        border: 1px solid var(--border-subtle);
+        border-radius: 6px;
+        background: var(--bg);
+        color: var(--text-secondary);
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.14s ease, color 0.14s ease, border-color 0.14s ease;
+      }
+
+      .mini-btn:hover {
+        background: var(--bg-hover);
+        color: var(--text-primary);
+      }
+
+      .mini-btn.active {
+        border-color: var(--text-accent);
+        color: var(--text-accent);
+        background: rgba(91, 166, 255, 0.12);
+      }
+
+      .mini-btn.primary {
+        background: var(--text-accent);
+        color: #111318;
+        border-color: transparent;
+      }
+
+      .mini-btn.primary:hover {
+        opacity: 0.92;
+      }
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 4.5px 0;
+        font-size: 11.5px;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+
+      .info-row:last-child {
+        border-bottom: none;
+      }
+
+      .info-key {
+        color: var(--text-secondary);
+      }
+
+      .info-val {
+        color: var(--text-primary);
+        font-weight: 500;
+      }
+
+      /* Auto Game Mode Tab */
+      .game-add-row {
+        display: grid;
+        grid-template-columns: 1fr 88px 46px;
+        gap: 5px;
+        margin-top: 6px;
+      }
+
+      .game-input,
+      .game-select {
+        width: 100%;
+        padding: 5px 7px;
+        border-radius: 6px;
+        border: 1px solid var(--border-subtle);
+        background: var(--bg);
+        color: var(--text-primary);
+        font-size: 11.5px;
+        outline: none;
+      }
+
+      .game-rules-list {
+        max-height: 162px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding-right: 2px;
+      }
+
+      .game-rule-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        padding: 6px 8px;
+        border-radius: 7px;
+        background: var(--bg);
+        border: 1px solid transparent;
+      }
+
+      .game-rule-item.detected {
+        border-color: rgba(29, 209, 161, 0.5);
+        background: rgba(29, 209, 161, 0.08);
+      }
+
+      .game-rule-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .game-rule-title {
+        font-size: 11.5px;
+        font-weight: 600;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .game-rule-exe {
+        font-size: 10.5px;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .game-rule-select {
+        padding: 3px 4px;
+        border-radius: 5px;
+        border: 1px solid var(--border-subtle);
+        background: var(--bg-elevated);
+        color: var(--text-accent);
+        font-size: 10.5px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .game-del-btn {
+        border: none;
+        background: transparent;
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 13px;
+        padding: 2px 5px;
+        border-radius: 4px;
+      }
+
+      .game-del-btn:hover {
+        background: rgba(255, 107, 107, 0.15);
+        color: #ff6b6b;
+      }
+
+      /* Icon Editor Specifics */
+      .icon-editor-top {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .icon-preview-box {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        background: #141518;
+        border: 1px solid var(--border-subtle);
+        flex-shrink: 0;
+      }
+
+      #iconCanvas {
+        width: 40px;
+        height: 40px;
+        image-rendering: auto;
+      }
+
+      .icon-editor-controls {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .editor-row {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .editor-input {
+        width: 52px;
+        padding: 4px 6px;
+        border-radius: 6px;
+        border: 1px solid var(--border-subtle);
+        background: var(--bg);
+        color: var(--text-primary);
+        font-size: 11.5px;
+        font-weight: 700;
+        text-align: center;
+        text-transform: uppercase;
+      }
+
+      .color-swatch-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 4px;
+      }
+
+      .swatch {
+        width: 21px;
+        height: 21px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: transform 0.12s ease, border-color 0.12s ease;
+      }
+
+      .swatch:hover {
+        transform: scale(1.1);
+      }
+
+      .swatch.active {
+        border-color: #ffffff;
+      }
+
+      .color-picker-native {
+        width: 23px;
+        height: 23px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        padding: 0;
+      }
+
+      /* Footer */
+      .footer {
+        border-top: 1px solid var(--border-subtle);
+        padding: 7px 14px 11px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .footer-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 3px 2px;
+      }
+
+      .footer-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: none;
+        background: transparent;
+        color: var(--text-primary);
+        font-size: 12.5px;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 4px 6px;
+        border-radius: 6px;
+        transition: background 0.14s ease, color 0.14s ease;
+      }
+
+      .footer-item:hover {
+        background: var(--bg-hover);
+      }
+
+      .footer-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-primary);
+        font-size: 12.5px;
+        font-weight: 500;
+        padding: 2px 6px;
+      }
+
+      .footer-icon {
+        color: var(--text-secondary);
+      }
+
+      /* Switch Toggle */
+      .switch {
+        position: relative;
+        width: 36px;
+        height: 20px;
+        background: #3a3d45;
+        border-radius: 999px;
+        border: none;
+        cursor: pointer;
+        transition: background 0.18s ease;
+      }
+
+      .switch.on {
+        background: var(--toggle-active);
+      }
+
+      .switch-thumb {
+        position: absolute;
+        top: 2px;
+        left: 2.5px;
+        width: 16px;
+        height: 16px;
+        background: #ffffff;
+        border-radius: 50%;
+        transition: transform 0.18s ease;
+      }
+
+      .switch.on .switch-thumb {
+        transform: translateX(15px);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="tray-shell">
+      <div class="header">
+        <div class="header-title-wrap">
+          <div class="header-title" id="headerTitle">MOONDROP Switch</div>
+          <span class="game-live-pill" id="gameLivePill">GAME</span>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn" id="btnGameModeShortcut" title="Auto-Detect Game Mode">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="6" y1="12" x2="10" y2="12"></line>
+              <line x1="8" y1="10" x2="8" y2="14"></line>
+              <line x1="15" y1="13" x2="15.01" y2="13"></line>
+              <line x1="18" y1="11" x2="18.01" y2="11"></line>
+              <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+            </svg>
+          </button>
+          <button class="icon-btn" id="btnRefresh" title="Refresh USB & Game Status">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="segmented-wrap">
+        <div class="segmented">
+          <button class="seg-btn active" id="tabBtnPresets">Presets</button>
+          <button class="seg-btn" id="tabBtnGames">Auto Game</button>
+          <button class="seg-btn" id="tabBtnDevice">Gain</button>
+          <button class="seg-btn" id="tabBtnIcon">Icon</button>
+        </div>
+      </div>
+
+      <!-- Tab 1: EQ Presets (CC Switch list layout) -->
+      <div class="tab-panel" id="panelPresets">
+        <div id="presetList"></div>
+      </div>
+
+      <!-- Tab 2: Auto-Detect Game Mode -->
+      <div class="tab-panel hidden" id="panelGames">
+        <div class="control-card">
+          <div class="control-card-header" style="margin-bottom: 4px">
+            <span class="control-label">Auto-Detect Game Mode</span>
+            <button class="switch on" id="gameModeSwitch" title="Automatically switch EQ preset when a game runs">
+              <span class="switch-thumb"></span>
+            </button>
+          </div>
+          <div class="info-row">
+            <span class="info-key">Active Game</span>
+            <span class="info-val" id="detectedGameLabel" style="color: var(--text-success)">Scanning...</span>
+          </div>
+          <div class="info-row" style="padding-top: 6px">
+            <span class="info-key">Revert to Default on Exit</span>
+            <button class="switch on" id="gameRevertSwitch">
+              <span class="switch-thumb"></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="control-card">
+          <div class="control-card-header">
+            <span class="control-label">Add / Map Game (.exe)</span>
+            <button class="mini-btn" style="flex: 0 0 auto; padding: 2px 7px" id="btnPickRunningExe" title="Pick from currently running processes">
+              Running .exe
+            </button>
+          </div>
+          <div class="game-add-row">
+            <input
+              type="text"
+              class="game-input"
+              id="newGameExeInput"
+              list="runningExesDatalist"
+              placeholder="e.g. cs2.exe"
+            />
+            <datalist id="runningExesDatalist"></datalist>
+            <select class="game-select" id="newGamePresetSelect">
+              <option value="3">FPS 1</option>
+              <option value="4">FPS 2</option>
+              <option value="1">Music</option>
+              <option value="2">3A Cinema</option>
+              <option value="0">Default</option>
+            </select>
+            <button class="mini-btn primary" id="btnAddGameRule">Add</button>
+          </div>
+        </div>
+
+        <div class="control-card" style="padding-bottom: 8px">
+          <div class="control-card-header">
+            <span class="control-label" id="rulesCountLabel">Game Rules</span>
+            <button class="mini-btn" style="flex: 0 0 auto; padding: 2px 7px" id="btnResetGameRules">
+              Reset List
+            </button>
+          </div>
+          <div class="game-rules-list" id="gameRulesList"></div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Device & DAC Gain Controls -->
+      <div class="tab-panel hidden" id="panelDevice">
+        <div class="control-card">
+          <div class="control-card-header">
+            <span class="control-label">DAC Global Gain</span>
+            <span class="control-value" id="gainValueLabel">0.0 dB</span>
+          </div>
+          <input
+            type="range"
+            class="gain-slider"
+            id="gainSlider"
+            min="-18"
+            max="0"
+            step="0.5"
+            value="0"
+          />
+          <div class="gain-presets">
+            <button class="mini-btn" data-gain="-12">-12 dB</button>
+            <button class="mini-btn" data-gain="-6">-6 dB</button>
+            <button class="mini-btn" data-gain="-3">-3 dB</button>
+            <button class="mini-btn" data-gain="0">0 dB</button>
+          </div>
+        </div>
+
+        <div class="control-card">
+          <div class="info-row">
+            <span class="info-key">Device</span>
+            <span class="info-val" id="infoProductName">MOONDROP Rays</span>
+          </div>
+          <div class="info-row">
+            <span class="info-key">Connection</span>
+            <span class="info-val" id="infoConnection">USB-HID Direct</span>
+          </div>
+          <div class="info-row">
+            <span class="info-key">Firmware</span>
+            <span class="info-val" id="infoFirmware">v0.6</span>
+          </div>
+          <div class="info-row">
+            <span class="info-key">USB VID : PID</span>
+            <span class="info-val" id="infoVidPid">0x35D8 : 0x011B</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Tray Icon Editor -->
+      <div class="tab-panel hidden" id="panelIcon">
+        <div class="control-card">
+          <div class="control-card-header">
+            <span class="control-label">Tray Icon Preview</span>
+            <span class="control-value" id="iconStatusLabel">64×64 Live</span>
+          </div>
+          <div class="icon-editor-top">
+            <div class="icon-preview-box">
+              <canvas id="iconCanvas" width="64" height="64"></canvas>
+            </div>
+            <div class="icon-editor-controls">
+              <div class="editor-row">
+                <button class="mini-btn active" data-shape="circle">Circle</button>
+                <button class="mini-btn" data-shape="squircle">Squircle</button>
+                <button class="mini-btn" data-shape="none">Clear</button>
+              </div>
+              <div class="editor-row">
+                <button class="mini-btn active" data-glyph="headphone">IEM</button>
+                <button class="mini-btn" data-glyph="rays">Bolt</button>
+                <button class="mini-btn" data-glyph="wave">EQ</button>
+                <button class="mini-btn" data-glyph="text">Text</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="control-card">
+          <div class="control-card-header">
+            <span class="control-label">Accent Color &amp; Badge Text</span>
+            <input type="text" class="editor-input" id="iconBadgeText" maxlength="3" value="MD" title="Badge Text (up to 3 chars)" />
+          </div>
+          <div class="color-swatch-row">
+            <button class="swatch active" data-color="#5ba6ff" style="background: #5ba6ff"></button>
+            <button class="swatch" data-color="#ff6b6b" style="background: #ff6b6b"></button>
+            <button class="swatch" data-color="#feca57" style="background: #feca57"></button>
+            <button class="swatch" data-color="#1dd1a1" style="background: #1dd1a1"></button>
+            <button class="swatch" data-color="#a29bfe" style="background: #a29bfe"></button>
+            <button class="swatch" data-color="#f368e0" style="background: #f368e0"></button>
+            <button class="swatch" data-color="#ffffff" style="background: #ffffff"></button>
+            <input type="color" class="color-picker-native" id="iconCustomColor" value="#5ba6ff" title="Custom Color" />
+          </div>
+        </div>
+
+        <div class="control-card">
+          <div class="editor-row">
+            <button class="mini-btn" id="btnUploadIconImage">Upload PNG/SVG</button>
+            <button class="mini-btn" id="btnResetIcon">Reset Default</button>
+            <button class="mini-btn primary" id="btnApplyIcon">Apply to Tray</button>
+          </div>
+          <input type="file" id="iconFileInput" accept="image/*" style="display: none" />
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <div class="footer-row">
+          <div class="footer-label">
+            <svg class="footer-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+            <span>Start with Windows</span>
+          </div>
+          <button class="switch" id="autostartSwitch" title="Launch minimized to system tray at Windows startup">
+            <span class="switch-thumb"></span>
+          </button>
+        </div>
+
+        <div class="footer-row">
+          <div class="footer-label">
+            <svg class="footer-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path>
+              <line x1="16" y1="8" x2="2" y2="22"></line>
+              <line x1="17.5" y1="15" x2="9" y2="15"></line>
+            </svg>
+            <span>Lightweight mode</span>
+          </div>
+          <button class="switch" id="lightweightSwitch" title="Keep running in system tray when main window closes">
+            <span class="switch-thumb"></span>
+          </button>
+        </div>
+
+        <div class="footer-row">
+          <button class="footer-item" id="btnOpenMain">
+            <svg class="footer-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            <span>Open main window</span>
+          </button>
+
+          <button class="footer-item" id="btnQuit">
+            <svg class="footer-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+              <line x1="12" y1="2" x2="12" y2="12"></line>
+            </svg>
+            <span>Quit</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const PRESET_NAMES = {
+          0: "Default",
+          3: "FPS 1",
+          4: "FPS 2",
+          1: "Music",
+          2: "3A Cinema"
+        };
+
+        const PRESETS = [
+          {
+            index: 0,
+            title: "Default Tuning",
+            subtitle: "MOONDROP Reference",
+            color: "#e67e22",
+            icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"></path><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"></path></svg>`
+          },
+          {
+            index: 3,
+            title: "FPS Footsteps I",
+            subtitle: "CS2 / Valorant / R6",
+            color: "#ff6b6b",
+            icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="22" y1="12" x2="18" y2="12"></line><line x1="6" y1="12" x2="2" y2="12"></line><line x1="12" y1="6" x2="12" y2="2"></line><line x1="12" y1="22" x2="12" y2="18"></line></svg>`
+          },
+          {
+            index: 4,
+            title: "FPS Tactical II",
+            subtitle: "Apex / Overwatch / CoD",
+            color: "#feca57",
+            icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#feca57" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`
+          },
+          {
+            index: 1,
+            title: "Music & Rhythm",
+            subtitle: "osu! / Rhythm Game",
+            color: "#48dbfb",
+            icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#48dbfb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>`
+          },
+          {
+            index: 2,
+            title: "Triple-A Cinema",
+            subtitle: "Cyberpunk / Elden Ring / Wukong",
+            color: "#a29bfe",
+            icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a29bfe" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`
+          }
+        ];
+
+        let state = {
+          connected: true,
+          productName: "MOONDROP Rays",
+          vendorId: 0x35d8,
+          productId: 0x011b,
+          firmwareVersion: "0.6",
+          activeEqIndex: 0,
+          globalGainDb: 0.0,
+          lightweight: false,
+          autostart: false,
+          busy: false
+        };
+
+        let gameState = {
+          enabled: true,
+          revertOnExit: true,
+          detectedExe: null,
+          detectedGameName: null,
+          activeRulePreset: null,
+          rules: []
+        };
+
+        let iconEditorState = {
+          shape: "circle",
+          glyph: "headphone",
+          color: "#5ba6ff",
+          text: "MD",
+          uploadedImg: null
+        };
+
+        function invokeTauri(cmd, args = {}) {
+          const internals = window.__TAURI_INTERNALS__ || window.__TAURI__;
+          if (internals && typeof internals.invoke === "function") {
+            return internals.invoke(cmd, args);
+          }
+          if (window.__TAURI__ && window.__TAURI__.core && typeof window.__TAURI__.core.invoke === "function") {
+            return window.__TAURI__.core.invoke(cmd, args);
+          }
+          return Promise.reject(new Error("Tauri IPC unavailable"));
+        }
+
+        function renderPresets() {
+          const container = document.getElementById("presetList");
+          container.innerHTML = PRESETS.map((p) => {
+            const isActive = state.connected && state.activeEqIndex === p.index;
+            const isAutoGameMatch =
+              gameState.enabled &&
+              gameState.detectedGameName &&
+              gameState.activeRulePreset === p.index;
+
+            const statusHtml = !state.connected
+              ? `<span class="warn-tag">USB Disconnected</span>`
+              : isAutoGameMatch
+              ? `<span class="status-tag" style="color:var(--text-success)">Auto: ${gameState.detectedGameName}</span>`
+              : isActive
+              ? `<span class="status-tag">Direct · Active</span>`
+              : `<span class="status-tag" style="opacity:0.65">Direct</span>`;
+
+            const chevronSvg = isActive
+              ? `<svg class="preset-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+              : `<svg class="preset-chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>`;
+
+            return `
+              <button class="preset-row ${isActive ? "active" : ""}" data-preset="${p.index}">
+                <div class="preset-badge">${p.icon}</div>
+                <div class="preset-meta">
+                  <div class="preset-title">${p.title}</div>
+                  <div class="preset-sub">${p.subtitle} · ${statusHtml}</div>
+                </div>
+                ${chevronSvg}
+              </button>
+            `;
+          }).join("");
+
+          container.querySelectorAll(".preset-row").forEach((btn) => {
+            btn.addEventListener("click", async () => {
+              if (state.busy) return;
+              const idx = Number(btn.getAttribute("data-preset"));
+              state.activeEqIndex = idx;
+              renderPresets();
+              state.busy = true;
+              try {
+                const updated = await invokeTauri("tray_set_eq_preset", { presetIndex: idx });
+                applyStatus(updated);
+              } catch (_) {
+              } finally {
+                state.busy = false;
+              }
+            });
+          });
+        }
+
+        function applyGameStatus(dto) {
+          if (!dto) return;
+          gameState.enabled = !!dto.enabled;
+          gameState.revertOnExit = !!dto.revertOnExit;
+          gameState.detectedExe = dto.detectedExe || null;
+          gameState.detectedGameName = dto.detectedGameName || null;
+          gameState.activeRulePreset = dto.activeRulePreset ?? null;
+          gameState.rules = Array.isArray(dto.rules) ? dto.rules : [];
+
+          document.getElementById("gameModeSwitch").classList.toggle("on", gameState.enabled);
+          document.getElementById("gameRevertSwitch").classList.toggle("on", gameState.revertOnExit);
+
+          const livePill = document.getElementById("gameLivePill");
+          const detectedLabel = document.getElementById("detectedGameLabel");
+
+          if (!gameState.enabled) {
+            livePill.classList.remove("visible");
+            detectedLabel.textContent = "Disabled";
+            detectedLabel.style.color = "var(--text-secondary)";
+          } else if (gameState.detectedGameName) {
+            const pName = PRESET_NAMES[gameState.activeRulePreset] || "Active";
+            livePill.textContent = `${gameState.detectedGameName} · ${pName}`;
+            livePill.classList.add("visible");
+            detectedLabel.textContent = `${gameState.detectedGameName} (${pName})`;
+            detectedLabel.style.color = "var(--text-success)";
+          } else {
+            livePill.classList.remove("visible");
+            detectedLabel.textContent = "Idle (Watching processes)";
+            detectedLabel.style.color = "var(--text-secondary)";
+          }
+
+          document.getElementById("rulesCountLabel").textContent = `Game Rules (${gameState.rules.length})`;
+
+          const listEl = document.getElementById("gameRulesList");
+          listEl.innerHTML = gameState.rules
+            .map((r) => {
+              const isDetected =
+                gameState.detectedExe &&
+                gameState.detectedExe.toLowerCase() === r.exeName.toLowerCase();
+              return `
+                <div class="game-rule-item ${isDetected ? "detected" : ""}">
+                  <div class="game-rule-info">
+                    <div class="game-rule-title">${r.displayName}</div>
+                    <div class="game-rule-exe">${r.exeName}</div>
+                  </div>
+                  <select class="game-rule-select" data-exe="${r.exeName}" data-name="${r.displayName}">
+                    <option value="3" ${r.presetIndex === 3 ? "selected" : ""}>FPS 1</option>
+                    <option value="4" ${r.presetIndex === 4 ? "selected" : ""}>FPS 2</option>
+                    <option value="1" ${r.presetIndex === 1 ? "selected" : ""}>Music</option>
+                    <option value="2" ${r.presetIndex === 2 ? "selected" : ""}>3A Cinema</option>
+                    <option value="0" ${r.presetIndex === 0 ? "selected" : ""}>Default</option>
+                  </select>
+                  <button class="game-del-btn" data-del-exe="${r.exeName}" title="Remove rule">×</button>
+                </div>
+              `;
+            })
+            .join("");
+
+          listEl.querySelectorAll(".game-rule-select").forEach((sel) => {
+            sel.addEventListener("change", async () => {
+              const exeName = sel.getAttribute("data-exe");
+              const displayName = sel.getAttribute("data-name");
+              const presetIndex = Number(sel.value);
+              try {
+                const updated = await invokeTauri("game_mode_upsert_rule", {
+                  exeName,
+                  displayName,
+                  presetIndex,
+                  enabled: true
+                });
+                applyGameStatus(updated);
+              } catch (_) {}
+            });
+          });
+
+          listEl.querySelectorAll(".game-del-btn").forEach((btn) => {
+            btn.addEventListener("click", async () => {
+              const exeName = btn.getAttribute("data-del-exe");
+              try {
+                const updated = await invokeTauri("game_mode_remove_rule", { exeName });
+                applyGameStatus(updated);
+              } catch (_) {}
+            });
+          });
+
+          renderPresets();
+        }
+
+        function applyStatus(dto) {
+          if (!dto) return;
+          state.connected = !!dto.connected;
+          state.productName = dto.productName || "MOONDROP Audio";
+          state.vendorId = dto.vendorId || 0;
+          state.productId = dto.productId || 0;
+          state.firmwareVersion = dto.firmwareVersion || "—";
+          state.activeEqIndex = Number(dto.activeEqIndex ?? 0);
+          state.globalGainDb = Number(dto.globalGainDb ?? 0);
+
+          document.getElementById("headerTitle").textContent = state.connected
+            ? state.productName
+            : "MOONDROP Switch";
+
+          document.getElementById("infoProductName").textContent = state.productName;
+          document.getElementById("infoConnection").textContent = state.connected
+            ? "USB-HID Direct"
+            : "Disconnected";
+          document.getElementById("infoFirmware").textContent = state.connected
+            ? `v${state.firmwareVersion}`
+            : "—";
+          document.getElementById("infoVidPid").textContent = state.connected
+            ? `0x${state.vendorId.toString(16).toUpperCase().padStart(4, "0")} : 0x${state.productId.toString(16).toUpperCase().padStart(4, "0")}`
+            : "—";
+
+          const slider = document.getElementById("gainSlider");
+          const label = document.getElementById("gainValueLabel");
+          slider.value = String(state.globalGainDb);
+          label.textContent = `${state.globalGainDb.toFixed(1)} dB`;
+
+          renderPresets();
+        }
+
+        async function refreshStatus() {
+          try {
+            const [dto, lw, gm, auto] = await Promise.all([
+              invokeTauri("tray_get_status"),
+              invokeTauri("tray_get_lightweight_mode"),
+              invokeTauri("game_mode_get_status"),
+              invokeTauri("tray_get_autostart")
+            ]);
+            state.lightweight = !!lw;
+            state.autostart = !!auto;
+            document.getElementById("lightweightSwitch").classList.toggle("on", state.lightweight);
+            document.getElementById("autostartSwitch").classList.toggle("on", state.autostart);
+            applyGameStatus(gm);
+            applyStatus(dto);
+          } catch (_) {
+            renderPresets();
+          }
+        }
+
+        // Tab Switching (Presets / Auto Game / Gain / Icon)
+        const tabs = [
+          { btn: document.getElementById("tabBtnPresets"), panel: document.getElementById("panelPresets") },
+          { btn: document.getElementById("tabBtnGames"), panel: document.getElementById("panelGames") },
+          { btn: document.getElementById("tabBtnDevice"), panel: document.getElementById("panelDevice") },
+          { btn: document.getElementById("tabBtnIcon"), panel: document.getElementById("panelIcon") }
+        ];
+
+        function activateTab(targetIndex) {
+          tabs.forEach((t, i) => {
+            t.btn.classList.toggle("active", i === targetIndex);
+            t.panel.classList.toggle("hidden", i !== targetIndex);
+          });
+        }
+
+        tabs.forEach((t, idx) => {
+          t.btn.addEventListener("click", () => activateTab(idx));
+        });
+
+        document.getElementById("btnGameModeShortcut").addEventListener("click", () => {
+          activateTab(1);
+        });
+
+        // Auto Game Mode Controls
+        document.getElementById("gameModeSwitch").addEventListener("click", async () => {
+          try {
+            const updated = await invokeTauri("game_mode_set_enabled", {
+              enabled: !gameState.enabled
+            });
+            applyGameStatus(updated);
+          } catch (_) {}
+        });
+
+        document.getElementById("gameRevertSwitch").addEventListener("click", async () => {
+          try {
+            const updated = await invokeTauri("game_mode_set_revert_on_exit", {
+              revertOnExit: !gameState.revertOnExit
+            });
+            applyGameStatus(updated);
+          } catch (_) {}
+        });
+
+        document.getElementById("btnAddGameRule").addEventListener("click", async () => {
+          const inputEl = document.getElementById("newGameExeInput");
+          const exeRaw = inputEl.value.trim();
+          if (!exeRaw) return;
+          const presetIndex = Number(document.getElementById("newGamePresetSelect").value);
+          const displayName = exeRaw.replace(/\.exe$/i, "");
+          try {
+            const updated = await invokeTauri("game_mode_upsert_rule", {
+              exeName: exeRaw,
+              displayName,
+              presetIndex,
+              enabled: true
+            });
+            inputEl.value = "";
+            applyGameStatus(updated);
+          } catch (_) {}
+        });
+
+        document.getElementById("btnPickRunningExe").addEventListener("click", async () => {
+          try {
+            const exes = await invokeTauri("game_mode_list_running_exes");
+            const dl = document.getElementById("runningExesDatalist");
+            dl.innerHTML = (exes || []).map((e) => `<option value="${e}"></option>`).join("");
+            const inputEl = document.getElementById("newGameExeInput");
+            inputEl.focus();
+          } catch (_) {}
+        });
+
+        document.getElementById("btnResetGameRules").addEventListener("click", async () => {
+          try {
+            const updated = await invokeTauri("game_mode_reset_defaults");
+            applyGameStatus(updated);
+          } catch (_) {}
+        });
+
+        // Gain Slider & Quick Gain Buttons
+        const gainSlider = document.getElementById("gainSlider");
+        const gainValueLabel = document.getElementById("gainValueLabel");
+
+        gainSlider.addEventListener("input", () => {
+          const val = Number(gainSlider.value);
+          gainValueLabel.textContent = `${val.toFixed(1)} dB`;
+        });
+
+        gainSlider.addEventListener("change", async () => {
+          const val = Number(gainSlider.value);
+          try {
+            const updated = await invokeTauri("tray_set_global_gain", { gainDb: val });
+            applyStatus(updated);
+          } catch (_) {}
+        });
+
+        document.querySelectorAll(".mini-btn[data-gain]").forEach((btn) => {
+          btn.addEventListener("click", async () => {
+            const val = Number(btn.getAttribute("data-gain"));
+            gainSlider.value = String(val);
+            gainValueLabel.textContent = `${val.toFixed(1)} dB`;
+            try {
+              const updated = await invokeTauri("tray_set_global_gain", { gainDb: val });
+              applyStatus(updated);
+            } catch (_) {}
+          });
+        });
+
+        // Tray Icon Editor Canvas Renderer
+        const canvas = document.getElementById("iconCanvas");
+        const ctx = canvas.getContext("2d");
+
+        function roundRect(ctx, x, y, w, h, r) {
+          ctx.beginPath();
+          ctx.moveTo(x + r, y);
+          ctx.arcTo(x + w, y, x + w, y + h, r);
+          ctx.arcTo(x + w, y + h, x, y + h, r);
+          ctx.arcTo(x, y + h, x, y, r);
+          ctx.arcTo(x, y, x + w, y, r);
+          ctx.closePath();
+        }
+
+        function drawIconCanvas() {
+          ctx.clearRect(0, 0, 64, 64);
+
+          if (iconEditorState.uploadedImg) {
+            ctx.drawImage(iconEditorState.uploadedImg, 2, 2, 60, 60);
+            return;
+          }
+
+          const accent = iconEditorState.color;
+
+          if (iconEditorState.shape === "circle") {
+            ctx.fillStyle = "#181a20";
+            ctx.beginPath();
+            ctx.arc(32, 32, 29, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.lineWidth = 3.5;
+            ctx.strokeStyle = accent;
+            ctx.stroke();
+          } else if (iconEditorState.shape === "squircle") {
+            ctx.fillStyle = "#181a20";
+            roundRect(ctx, 4, 4, 56, 56, 15);
+            ctx.fill();
+            ctx.lineWidth = 3.5;
+            ctx.strokeStyle = accent;
+            ctx.stroke();
+          }
+
+          ctx.strokeStyle = accent;
+          ctx.fillStyle = accent;
+          ctx.lineCap = "round";
+          ctx.lineJoin = "round";
+
+          if (iconEditorState.glyph === "headphone") {
+            ctx.lineWidth = 4.5;
+            ctx.beginPath();
+            ctx.arc(32, 32, 15, Math.PI, 0, false);
+            ctx.stroke();
+            roundRect(ctx, 13, 30, 7, 14, 3.5);
+            ctx.fill();
+            roundRect(ctx, 44, 30, 7, 14, 3.5);
+            ctx.fill();
+          } else if (iconEditorState.glyph === "rays") {
+            ctx.beginPath();
+            ctx.moveTo(35, 12);
+            ctx.lineTo(18, 34);
+            ctx.lineTo(31, 34);
+            ctx.lineTo(27, 52);
+            ctx.lineTo(46, 29);
+            ctx.lineTo(33, 29);
+            ctx.closePath();
+            ctx.fill();
+          } else if (iconEditorState.glyph === "wave") {
+            const bars = [
+              { x: 16, h: 16 },
+              { x: 24, h: 28 },
+              { x: 32, h: 36 },
+              { x: 40, h: 24 },
+              { x: 48, h: 14 }
+            ];
+            bars.forEach((b) => {
+              roundRect(ctx, b.x - 2.5, 32 - b.h / 2, 5, b.h, 2.5);
+              ctx.fill();
+            });
+          } else if (iconEditorState.glyph === "text") {
+            const txt = (iconEditorState.text || "MD").toUpperCase();
+            ctx.font = `800 ${txt.length > 2 ? 20 : 24}px "Segoe UI", sans-serif`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(txt, 32, 33);
+          }
+        }
+
+        document.querySelectorAll("[data-shape]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            iconEditorState.uploadedImg = null;
+            iconEditorState.shape = btn.getAttribute("data-shape");
+            document.querySelectorAll("[data-shape]").forEach((b) => b.classList.toggle("active", b === btn));
+            drawIconCanvas();
+          });
+        });
+
+        document.querySelectorAll("[data-glyph]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            iconEditorState.uploadedImg = null;
+            iconEditorState.glyph = btn.getAttribute("data-glyph");
+            document.querySelectorAll("[data-glyph]").forEach((b) => b.classList.toggle("active", b === btn));
+            drawIconCanvas();
+          });
+        });
+
+        document.querySelectorAll(".swatch[data-color]").forEach((sw) => {
+          sw.addEventListener("click", () => {
+            iconEditorState.uploadedImg = null;
+            iconEditorState.color = sw.getAttribute("data-color");
+            document.getElementById("iconCustomColor").value = iconEditorState.color;
+            document.querySelectorAll(".swatch").forEach((s) => s.classList.toggle("active", s === sw));
+            drawIconCanvas();
+          });
+        });
+
+        document.getElementById("iconCustomColor").addEventListener("input", (e) => {
+          iconEditorState.uploadedImg = null;
+          iconEditorState.color = e.target.value;
+          document.querySelectorAll(".swatch").forEach((s) => s.classList.remove("active"));
+          drawIconCanvas();
+        });
+
+        document.getElementById("iconBadgeText").addEventListener("input", (e) => {
+          iconEditorState.uploadedImg = null;
+          iconEditorState.text = e.target.value || "MD";
+          iconEditorState.glyph = "text";
+          document.querySelectorAll("[data-glyph]").forEach((b) =>
+            b.classList.toggle("active", b.getAttribute("data-glyph") === "text")
+          );
+          drawIconCanvas();
+        });
+
+        document.getElementById("btnUploadIconImage").addEventListener("click", () => {
+          document.getElementById("iconFileInput").click();
+        });
+
+        document.getElementById("iconFileInput").addEventListener("change", (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            const img = new Image();
+            img.onload = () => {
+              iconEditorState.uploadedImg = img;
+              drawIconCanvas();
+            };
+            img.src = reader.result;
+          };
+          reader.readAsDataURL(file);
+        });
+
+        document.getElementById("btnApplyIcon").addEventListener("click", async () => {
+          const imgData = ctx.getImageData(0, 0, 64, 64);
+          const rgbaArray = Array.from(imgData.data);
+          const statusEl = document.getElementById("iconStatusLabel");
+          try {
+            await invokeTauri("tray_set_custom_icon", {
+              width: 64,
+              height: 64,
+              rgba: rgbaArray
+            });
+            statusEl.textContent = "Applied & Saved!";
+            setTimeout(() => {
+              statusEl.textContent = "64×64 Live";
+            }, 1800);
+          } catch (_) {
+            statusEl.textContent = "Failed";
+          }
+        });
+
+        document.getElementById("btnResetIcon").addEventListener("click", async () => {
+          iconEditorState.uploadedImg = null;
+          drawIconCanvas();
+          const statusEl = document.getElementById("iconStatusLabel");
+          try {
+            await invokeTauri("tray_reset_default_icon");
+            statusEl.textContent = "Default Restored";
+            setTimeout(() => {
+              statusEl.textContent = "64×64 Live";
+            }, 1800);
+          } catch (_) {}
+        });
+
+        // Start with Windows Switch
+        document.getElementById("autostartSwitch").addEventListener("click", async () => {
+          const nextVal = !state.autostart;
+          state.autostart = nextVal;
+          document.getElementById("autostartSwitch").classList.toggle("on", state.autostart);
+          try {
+            const actual = await invokeTauri("tray_set_autostart", { enabled: nextVal });
+            state.autostart = !!actual;
+            document.getElementById("autostartSwitch").classList.toggle("on", state.autostart);
+          } catch (_) {}
+        });
+
+        // Lightweight Mode Switch
+        document.getElementById("lightweightSwitch").addEventListener("click", async () => {
+          state.lightweight = !state.lightweight;
+          document.getElementById("lightweightSwitch").classList.toggle("on", state.lightweight);
+          try {
+            await invokeTauri("tray_set_lightweight_mode", { enabled: state.lightweight });
+          } catch (_) {}
+        });
+
+        // Header Refresh & Open Main Window & Quit
+        document.getElementById("btnRefresh").addEventListener("click", () => {
+          refreshStatus();
+        });
+
+        document.getElementById("btnOpenMain").addEventListener("click", () => {
+          invokeTauri("tray_open_main_window");
+        });
+
+        document.getElementById("btnQuit").addEventListener("click", () => {
+          invokeTauri("tray_quit_app");
+        });
+
+        window.__MOONDROP_TRAY_REFRESH__ = refreshStatus;
+        drawIconCanvas();
+        renderPresets();
+        refreshStatus();
+      })();
+    </script>
+  </body>
+</html>

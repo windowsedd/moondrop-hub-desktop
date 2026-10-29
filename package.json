@@ -1,0 +1,13 @@
+{
+  "name": "moondrop-hub-desktop",
+  "version": "1.6.5",
+  "private": true,
+  "type": "module",
+  "description": "MOONDROP Hub Desktop (Rust + Tauri v2) with native OS USB-HID support for Moondrop Rays and audio devices",
+  "scripts": {
+    "prepare-frontend": "node scripts/prepare-frontend.mjs",
+    "test": "node --test tests/prepare-frontend.test.mjs",
+    "build": "node scripts/prepare-frontend.mjs && cargo build --manifest-path src-tauri/Cargo.toml --release",
+    "build:installer": "npx --yes @tauri-apps/cli@2 build"
+  }
+}

@@ -1,0 +1,1 @@
+function i(r){return typeof r=="string"}function t(r){return i(r)?!Number.isNaN(Number(r)):!1}function n(r){return/^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\-]*\.)+[A-Z]{2,}$/i.test(r)}export{i as a,t as b,n as i};

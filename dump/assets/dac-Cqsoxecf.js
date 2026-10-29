@@ -1,0 +1,1 @@
+var L=(S=>(S[S.FAST_LL=1]="FAST_LL",S[S.FAST_PC=2]="FAST_PC",S[S.SLOW_LL=3]="SLOW_LL",S[S.SLOW_PC=4]="SLOW_PC",S[S.NON_OS=5]="NON_OS",S))(L||{}),_=(S=>(S[S.CLASS_H=0]="CLASS_H",S[S.CLASS_AB=1]="CLASS_AB",S))(_||{});export{L as D,_ as a};
