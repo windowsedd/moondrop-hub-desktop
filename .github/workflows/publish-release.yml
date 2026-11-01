@@ -1,0 +1,38 @@
+name: Publish v1.6.5 release
+
+on:
+  push:
+    branches: [claude/practical-ramanujan-alvph4]
+    paths: [.github/workflows/publish-release.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      # Binaries were committed in e16ecfd; pull them from there so they
+      # never need to live in the current tree.
+      - uses: actions/checkout@v4
+        with:
+          ref: e16ecfd
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v1.6.5 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release v1.6.5 already exists"; exit 0
+          fi
+          gh release create v1.6.5 --repo "$GITHUB_REPOSITORY" \
+            --target main \
+            --title "MOONDROP Hub Desktop v1.6.5" \
+            --notes "Windows x64 builds of MOONDROP Hub Desktop 1.6.5.
+
+          - \`MOONDROP-Hub-Desktop.exe\`: portable, no install needed
+          - \`MOONDROP-Hub-Desktop_1.6.5_x64-setup.exe\`: NSIS setup installer
+          - \`MOONDROP-Hub-Desktop_1.6.5_x64_en-US.msi\`: MSI package" \
+            MOONDROP-Hub-Desktop.exe \
+            MOONDROP-Hub-Desktop_1.6.5_x64-setup.exe \
+            MOONDROP-Hub-Desktop_1.6.5_x64_en-US.msi
