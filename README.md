@@ -26,13 +26,13 @@ Built with **Rust**, **Tauri v2**, and a native OS-level **USB-HID backend (`hid
 
 ## Pre-Built Binaries & Installers
 
-Located in the repository root:
+Download from [GitHub Releases](https://github.com/windowsedd/moondrop-hub-desktop/releases/latest):
 
 | Artifact | File | Description |
 | :--- | :--- | :--- |
-| **Portable Executable** | `./MOONDROP-Hub-Desktop.exe` | Single-file standalone executable (no installation required) |
-| **NSIS Setup Installer** | `./MOONDROP-Hub-Desktop_1.6.5_x64-setup.exe` | Standard Windows Setup wizard (`.exe`) |
-| **Windows MSI Package** | `./MOONDROP-Hub-Desktop_1.6.5_x64_en-US.msi` | Windows Installer package (`.msi`) |
+| **Portable Executable** | `MOONDROP-Hub-Desktop.exe` | Single-file standalone executable (no installation required) |
+| **NSIS Setup Installer** | `MOONDROP-Hub-Desktop_1.6.5_x64-setup.exe` | Standard Windows Setup wizard (`.exe`) |
+| **Windows MSI Package** | `MOONDROP-Hub-Desktop_1.6.5_x64_en-US.msi` | Windows Installer package (`.msi`) |
 
 ---
 
@@ -49,9 +49,6 @@ Located in the repository root:
 ## Project Structure
 
 ```text
-├── MOONDROP-Hub-Desktop.exe                   # Standalone portable release executable
-├── MOONDROP-Hub-Desktop_1.6.5_x64-setup.exe   # Windows NSIS installer
-├── MOONDROP-Hub-Desktop_1.6.5_x64_en-US.msi   # Windows MSI installer
 ├── package.json                               # Build & test scripts
 ├── scripts/
 │   └── prepare-frontend.mjs                   # Cleans dump/ -> dist/ & injects bridge + tray UI
